@@ -27,9 +27,9 @@ class Portfolio:
         model.objective = pyo.Objective(
             expr=pyo.quicksum(
                 pyo.quicksum(
-                    self.cov_matrix[i][j] * model.w[i] * model.w[j] for j in model.N # type: ignore
+                    self.cov_matrix[i][j] * model.w[i] * model.w[j] for j in model.N
                 )
-                for i in model.N  # type: ignore
+                for i in model.N
             ),
             sense=pyo.minimize,
         )
@@ -53,7 +53,7 @@ class Portfolio:
         model = self._build_model(desired_return)
         solver = pyo.SolverFactory(solver_name)
         results = solver.solve(model)
-        self.weights = np.array([pyo.value(model.w[j]) for j in model.N])  # type: ignore
+        self.weights = np.array([pyo.value(model.w[j]) for j in model.N])
         return results
 
     def compute_variance(self):
@@ -74,8 +74,8 @@ class Portfolio:
     def display_portfolio(self):
         selected_assets = [
             asset for asset, weight in zip(self.names, self.weights) if weight > 0
-        ]  # type: ignore
-        portfolio_weights = [weight for weight in self.weights if weight > 0]  # type: ignore
+        ]
+        portfolio_weights = [weight for weight in self.weights if weight > 0]
 
         fig = make_subplots(
             rows=1,
@@ -122,8 +122,7 @@ class Portfolio:
             width=1000,
         )
 
-        fig.show("png")
-
+        fig.show()
 
     def plot_capital_evo(self):
         # Compute the evolution of the capital over time with this portfolio
@@ -135,4 +134,4 @@ class Portfolio:
         fig = go.Figure()
         fig.add_trace(go.Scatter(x=list(range(253)), y=capital_evo, mode="lines", name="Capital evolution"))
         fig.update_layout(title="Capital evolution over time", xaxis_title="Days", yaxis_title="Capital")
-        fig.show("png")
+        fig.show()
