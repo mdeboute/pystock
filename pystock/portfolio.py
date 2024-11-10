@@ -1,7 +1,4 @@
-from re import S
 import pyomo.environ as pyo
-import plotly.graph_objects as go
-from plotly.subplots import make_subplots
 import pandas as pd
 import pystock.config as cfg
 import numpy as np
@@ -42,7 +39,7 @@ class Portfolio:
 
     def to_xlsx_file(self, file_path: str):
         data = {
-            "Name": [asset.name for asset in self.assets],
+            "Symbol": [asset.symbol for asset in self.assets],
             "Weight": self.weights,
         }
         df = pd.DataFrame(data)
@@ -143,34 +140,8 @@ class Portfolio:
         self.weights = np.delete(self.weights, idx)
         self._reset_cache()
 
-    def display_portfolio(self):
-        symbols = [asset.symbol for asset in self.assets]
-        selected_assets = [
-            asset for asset, weight in zip(symbols, self.weights) if weight > 0
-        ]
-        portfolio_weights = [weight for weight in self.weights if weight > 0]
+    def __str__(self) -> str:
+        return f"Portfolio({[asset.name for asset in self.assets]})"
 
-        fig = make_subplots(
-            rows=1,
-            cols=1,
-            subplot_titles=("Pie chart",),
-            specs=[[{"type": "domain"}]],
-        )
-
-        pie_trace = go.Pie(
-            labels=selected_assets,
-            values=portfolio_weights,
-            textinfo="label+percent",
-            hoverinfo="label+value+percent",
-            opacity=0.8,
-            name="Pie Chart",
-        )
-        fig.add_trace(pie_trace, row=1, col=1)
-
-        fig.update_layout(
-            title=f"Return of {self.portfolio_return:.2f} with a variance of {self.variance:.2f} and a risk of {self.risk:.2f}",
-            height=600,
-            width=1000,
-        )
-
-        fig.show()
+    def __repr__(self) -> str:
+        return self.__str__()

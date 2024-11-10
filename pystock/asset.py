@@ -12,6 +12,7 @@ class Asset:
             self.ticker = None
         self.listed = listed
         self._historic_data = None
+        self._closes = None
         self._daily_returns = None
         self._daily_log_returns = None
         self._expected_log_return = None
@@ -41,6 +42,12 @@ class Asset:
     @property
     def historical_data(self) -> pd.DataFrame | None:
         return self.fetch_historical_data()
+
+    @property
+    def closes(self) -> pd.Series | None:
+        if self._closes is None:
+            self._closes = self.historical_data["Close"]  # type: ignore
+        return self._closes
 
     @property
     def daily_returns(self) -> np.ndarray | None:
