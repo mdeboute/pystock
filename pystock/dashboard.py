@@ -27,7 +27,7 @@ def create_pie_chart(portfolio: Portfolio) -> go.Figure:
     fig.add_trace(pie_trace, row=1, col=1)
 
     fig.update_layout(
-        title=f"Return of {portfolio.portfolio_return:.2f} with a variance of {portfolio.variance:.2f} and a risk of {portfolio.risk:.2f}",
+        title=f"Return of {portfolio.portfolio_return:.2f} with a sharpe ratio of {portfolio.sharpe_ratio:.2f} and a risk of {portfolio.risk:.2f}",
         height=600,
         width=1000,
     )

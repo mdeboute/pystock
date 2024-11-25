@@ -17,9 +17,6 @@ class Portfolio:
         self.weights = weights
         self._cov_matrix = None
         self._expected_returns = None
-        self._variance = None
-        self._risk = None
-        self._return = None
         self._check_consistency()
 
     @classmethod
@@ -54,9 +51,6 @@ class Portfolio:
     def _reset_cache(self):
         self._cov_matrix = None
         self._expected_returns = None
-        self._variance = None
-        self._risk = None
-        self._return = None
 
     @property
     def cov_matrix(self):
@@ -116,18 +110,19 @@ class Portfolio:
 
     @property
     def variance(self):
-        self._variance = np.dot(self.weights, np.dot(self.cov_matrix, self.weights))
-        return self._variance
+        return np.dot(self.weights, np.dot(self.cov_matrix, self.weights))
 
     @property
     def risk(self):
-        self._risk = np.sqrt(self.variance)
-        return self._risk
+        return np.sqrt(self.variance)
 
     @property
     def portfolio_return(self):
-        self._return = np.dot(self.weights, self.expected_returns)
-        return self._return
+        return np.dot(self.weights, self.expected_returns)
+
+    @property
+    def sharpe_ratio(self):
+        return (self.portfolio_return - cfg.RISK_FREE_RATE) / self.risk
 
     def add_asset(self, asset: Asset, weight: float):
         self.assets.append(asset)
