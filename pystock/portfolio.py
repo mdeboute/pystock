@@ -1,5 +1,6 @@
 import pyomo.environ as pyo
 import pandas as pd
+import plotly.express as px
 import pystock.config as cfg
 import numpy as np
 
@@ -103,6 +104,7 @@ class Portfolio:
             )
 
         model.link_constraint = pyo.Constraint(model.N, rule=_link_constraint_rule)
+        
         return model
 
     def optimize(self, desired_return: float, solver_name: str = "knitroampl"):
@@ -139,6 +141,101 @@ class Portfolio:
         self.assets.pop(idx)
         self.weights = np.delete(self.weights, idx)
         self._reset_cache()
+
+    def _simulate_single_run(self, weights: np.ndarray, risk_free_rate: float = 0.02):
+        """
+        Simulate a single run of the Monte Carlo simulation for the given weights.
+        """
+        portfolio_return = np.dot(weights, self.expected_returns)
+        portfolio_risk = np.sqrt(np.dot(weights, np.dot(self.cov_matrix, weights)))
+        sharpe_ratio = (
+            (portfolio_return - risk_free_rate) / portfolio_risk
+            if portfolio_risk != 0
+            else 0
+        )
+        return portfolio_return, portfolio_risk, sharpe_ratio, weights.tolist()
+
+    def monte_carlo_simulation(self, num_simulations: int = 10000) -> pd.DataFrame:
+        """
+        Run the Monte Carlo simulation using pathos.multiprocessing to parallelize the simulation.
+
+        Args:
+            num_simulations (int): The number of simulations to run.
+
+        Returns:
+            pd.DataFrame: A DataFrame containing simulation results (returns, risk, Sharpe ratio, weights).
+        """
+
+        # Generate random weights for each simulation
+        simulations = [
+            np.random.dirichlet(np.ones(len(self.weights)), size=1).flatten()
+            for _ in range(num_simulations)
+        ]
+
+        # Run the simulation
+        results = []
+        for weights in simulations:
+            results.append(self._simulate_single_run(weights))
+
+        # Convert results into a DataFrame
+        simulation_df = pd.DataFrame(
+            results, columns=["Returns", "Risk", "Sharpe Ratio", "Weights"]
+        )
+
+        return simulation_df
+
+    def get_pareto_front(self, df: pd.DataFrame) -> pd.DataFrame:
+        """
+        Identifies the Pareto front from Monte Carlo simulation results.
+
+        Args:
+            df (pd.DataFrame): DataFrame of simulation results.
+
+        Returns:
+            pd.DataFrame: DataFrame containing Pareto-optimal portfolios.
+        """
+        pareto_front = df.sort_values("Risk").drop_duplicates("Returns", keep="first")
+        return pareto_front
+
+    def plot_pareto_front(self, df: pd.DataFrame):
+        """
+        Plots the simulation results as an interactive scatter plot using Plotly.
+        """
+        fig = px.scatter(
+            df,
+            x="Risk",
+            y="Returns",
+            color="Sharpe Ratio",
+            color_continuous_scale="Viridis",
+            title="Monte Carlo Simulation: Portfolio Risk vs. Return",
+            labels={"Risk": "Risk (Standard Deviation)", "Returns": "Return"},
+        )
+        fig.update_layout(
+            xaxis=dict(title="Risk (Standard Deviation)"),
+            yaxis=dict(title="Return"),
+            coloraxis_colorbar=dict(title="Sharpe Ratio"),
+        )
+        fig.show()
+
+    def optimize_sharpe_ratio(self, pareto_front: pd.DataFrame):
+        """
+        Finds the portfolio on the Pareto front that maximizes the Sharpe ratio.
+
+        Args:
+            pareto_front (pd.DataFrame): DataFrame of Pareto-optimal portfolios.
+            risk_free_rate (float): Risk-free rate for calculating Sharpe ratios.
+
+        Returns:
+            dict: Optimal portfolio details (returns, risk, Sharpe ratio, weights).
+        """
+        best_portfolio = pareto_front.loc[pareto_front["Sharpe Ratio"].idxmax()]
+        optimal_weights = best_portfolio["Weights"]
+        return {
+            "Return": best_portfolio["Returns"],
+            "Risk": best_portfolio["Risk"],
+            "Sharpe Ratio": best_portfolio["Sharpe Ratio"],
+            "Weights": optimal_weights,
+        }
 
     def __str__(self) -> str:
         return f"Portfolio({[asset.name for asset in self.assets]})"
