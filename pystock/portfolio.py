@@ -98,7 +98,7 @@ class Portfolio:
             )
 
         model.link_constraint = pyo.Constraint(model.N, rule=_link_constraint_rule)
-        
+
         return model
 
     def optimize(self, desired_return: float, solver_name: str = "knitroampl"):
