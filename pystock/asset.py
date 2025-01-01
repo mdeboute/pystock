@@ -24,7 +24,7 @@ class Asset:
         return self.ticker.info["shortName"] if self.listed else self.symbol  # type: ignore
 
     def fetch_historical_data(
-        self, period: str = "1y", interval: str = "1d"
+        self, period: str = "5y", interval: str = "1d"
     ) -> pd.DataFrame | None:
         if not self.listed:
             print(f"{self.name} is not listed! You should provide the data.")

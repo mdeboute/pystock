@@ -57,10 +57,13 @@ class Portfolio:
     def cov_matrix(self):
         if self._cov_matrix is None:
             period_in_days = len(self.assets[0].daily_returns)  # type: ignore
-            self._cov_matrix = (
-                np.cov(np.array([asset.daily_returns for asset in self.assets]))
-                * period_in_days
-            )
+            for asset in self.assets:
+                if len(asset.daily_returns) < period_in_days:
+                    period_in_days = len(asset.daily_returns)
+            daily_returns = [
+                asset.daily_returns[:period_in_days] for asset in self.assets
+            ]
+            self._cov_matrix = np.cov(np.array(daily_returns)) * period_in_days
         return self._cov_matrix
 
     @property
@@ -196,11 +199,13 @@ class Portfolio:
         """
         Plots the simulation results as an interactive scatter plot using Plotly.
         """
+        df["Weights"] = df["Weights"].apply(lambda x: str(x))  # Convert weights to string for display
         fig = px.scatter(
             df,
             x="Risk",
             y="Returns",
             color="Sharpe Ratio",
+            hover_data={"Weights": True},
             color_continuous_scale="Viridis",
             title="Monte Carlo Simulation: Portfolio Risk vs. Return",
             labels={"Risk": "Risk (Standard Deviation)", "Returns": "Return"},
