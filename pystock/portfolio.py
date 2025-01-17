@@ -1,11 +1,12 @@
-import pyomo.environ as pyo
-import pandas as pd
-import plotly.express as px
-import pystock.config as cfg
+from typing import List
+
+import constants as cst
 import numpy as np
+import pandas as pd
+import plotly.graph_objects as go
+from plotly.subplots import make_subplots
 
 from pystock.asset import Asset
-from typing import List
 
 
 class Portfolio:
@@ -23,22 +24,22 @@ class Portfolio:
     @classmethod
     def from_xlsx_file(cls, file_path: str):
         df = pd.read_excel(file_path)
-        if cfg.SYMBOL_COL not in df.columns or cfg.WEIGHT_COL not in df.columns:
+        if cst.SYMBOL_COL not in df.columns or cst.WEIGHT_COL not in df.columns:
             raise ValueError(
-                f"Columns {cfg.SYMBOL_COL} and {cfg.WEIGHT_COL} must be present in the file"
+                f"Columns {cst.SYMBOL_COL} and {cst.WEIGHT_COL} must be present in the file"
             )
         assets = []
         weights = []
         for _, row in df.iterrows():
-            asset = Asset(row[cfg.SYMBOL_COL])
+            asset = Asset(row[cst.SYMBOL_COL])
             assets.append(asset)
-            weights.append(row[cfg.WEIGHT_COL])
+            weights.append(row[cst.WEIGHT_COL])
         return cls(assets, np.array(weights))
 
     def to_xlsx_file(self, file_path: str):
         data = {
-            "Symbol": [asset.symbol for asset in self.assets],
-            "Weight": self.weights,
+            cst.SYMBOL_COL: [asset.symbol for asset in self.assets],
+            cst.WEIGHT_COL: self.weights,
         }
         df = pd.DataFrame(data)
         df.to_excel(file_path, index=False)
@@ -58,10 +59,10 @@ class Portfolio:
         if self._cov_matrix is None:
             period_in_days = len(self.assets[0].daily_returns)  # type: ignore
             for asset in self.assets:
-                if len(asset.daily_returns) < period_in_days:
-                    period_in_days = len(asset.daily_returns)
+                if len(asset.daily_returns) < period_in_days: # type: ignore
+                    period_in_days = len(asset.daily_returns) # type: ignore
             daily_returns = [
-                asset.daily_returns[:period_in_days] for asset in self.assets
+                asset.daily_returns[:period_in_days] for asset in self.assets # type: ignore
             ]
             self._cov_matrix = np.cov(np.array(daily_returns)) * period_in_days
         return self._cov_matrix
@@ -73,45 +74,6 @@ class Portfolio:
                 [asset.expected_return for asset in self.assets]
             )
         return self._expected_returns
-
-    def _build_model(self, desired_return: float) -> pyo.ConcreteModel:
-        model = pyo.ConcreteModel()
-        model.N = pyo.RangeSet(0, len(self.weights) - 1)
-        model.w = pyo.Var(model.N, within=pyo.NonNegativeReals)
-        model.objective = pyo.Objective(
-            expr=pyo.quicksum(
-                pyo.quicksum(
-                    self.cov_matrix[i][j] * model.w[i] * model.w[j]  # type: ignore
-                    for j in model.N  # type: ignore
-                )
-                for i in model.N  # type: ignore
-            ),
-            sense=pyo.minimize,
-        )
-
-        def _weight_constraint_rule(model):
-            return sum(model.w[i] for i in model.N) == 1
-
-        model.weight_constraint = pyo.Constraint(rule=_weight_constraint_rule)
-
-        def _link_constraint_rule(model, i):
-            return (
-                sum(model.w[i] * self.expected_returns[i] for i in model.N)
-                >= desired_return
-            )
-
-        model.link_constraint = pyo.Constraint(model.N, rule=_link_constraint_rule)
-
-        return model
-
-    def optimize(self, desired_return: float, solver_name: str = "knitroampl"):
-        """Minimize the variance of the portfolio with a given desired return"""
-        self.desired_return = desired_return
-        model = self._build_model(desired_return)
-        solver = pyo.SolverFactory(solver_name)
-        results = solver.solve(model)
-        self.weights = np.array([pyo.value(model.w[j]) for j in model.N])  # type: ignore
-        return results
 
     @property
     def variance(self):
@@ -127,7 +89,7 @@ class Portfolio:
 
     @property
     def sharpe_ratio(self):
-        return (self.portfolio_return - cfg.RISK_FREE_RATE) / self.risk
+        return (self.portfolio_return - cst.DEFAULT_RISK_FREE_RATE) / self.risk
 
     def add_asset(self, asset: Asset, weight: float):
         self.assets.append(asset)
@@ -140,105 +102,33 @@ class Portfolio:
         self.weights = np.delete(self.weights, idx)
         self._reset_cache()
 
-    def _simulate_single_run(self, weights: np.ndarray, risk_free_rate: float = 0.02):
-        """
-        Simulate a single run of the Monte Carlo simulation for the given weights.
-        """
-        portfolio_return = np.dot(weights, self.expected_returns)
-        portfolio_risk = np.sqrt(np.dot(weights, np.dot(self.cov_matrix, weights)))
-        sharpe_ratio = (
-            (portfolio_return - risk_free_rate) / portfolio_risk
-            if portfolio_risk != 0
-            else 0
-        )
-        return portfolio_return, portfolio_risk, sharpe_ratio, weights.tolist()
-
-    def monte_carlo_simulation(self, num_simulations: int = 10000) -> pd.DataFrame:
-        """
-        Run the Monte Carlo simulation using pathos.multiprocessing to parallelize the simulation.
-
-        Args:
-            num_simulations (int): The number of simulations to run.
-
-        Returns:
-            pd.DataFrame: A DataFrame containing simulation results (returns, risk, Sharpe ratio, weights).
-        """
-
-        # Generate random weights for each simulation
-        simulations = [
-            np.random.dirichlet(np.ones(len(self.weights)), size=1).flatten()
-            for _ in range(num_simulations)
-        ]
-
-        # Run the simulation
-        results = []
-        for weights in simulations:
-            results.append(self._simulate_single_run(weights))
-
-        # Convert results into a DataFrame
-        simulation_df = pd.DataFrame(
-            results, columns=["Returns", "Risk", "Sharpe Ratio", "Weights"]
-        )
-
-        return simulation_df
-
-    def get_pareto_front(self, df: pd.DataFrame) -> pd.DataFrame:
-        """
-        Identifies the Pareto front from Monte Carlo simulation results.
-
-        Args:
-            df (pd.DataFrame): DataFrame of simulation results.
-
-        Returns:
-            pd.DataFrame: DataFrame containing Pareto-optimal portfolios.
-        """
-        pareto_front = df.sort_values("Risk").drop_duplicates("Returns", keep="first")
-        return pareto_front
-
-    def plot_pareto_front(self, df: pd.DataFrame):
-        """
-        Plots the simulation results as an interactive scatter plot using Plotly.
-        """
-        df["Weights"] = df["Weights"].apply(lambda x: str(x))  # Convert weights to string for display
-        fig = px.scatter(
-            df,
-            x="Risk",
-            y="Returns",
-            color="Sharpe Ratio",
-            hover_data={"Weights": True},
-            color_continuous_scale="Viridis",
-            title="Monte Carlo Simulation: Portfolio Risk vs. Return",
-            labels={"Risk": "Risk (Standard Deviation)", "Returns": "Return"},
-        )
-        fig.update_layout(
-            xaxis=dict(title="Risk (Standard Deviation)"),
-            yaxis=dict(title="Return"),
-            coloraxis_colorbar=dict(title="Sharpe Ratio"),
-        )
-        fig.show()
-
-    def optimize_sharpe_ratio(self, pareto_front: pd.DataFrame):
-        """
-        Finds the portfolio on the Pareto front that maximizes the Sharpe ratio.
-
-        Args:
-            pareto_front (pd.DataFrame): DataFrame of Pareto-optimal portfolios.
-            risk_free_rate (float): Risk-free rate for calculating Sharpe ratios.
-
-        Returns:
-            dict: Optimal portfolio details (returns, risk, Sharpe ratio, weights).
-        """
-        best_portfolio = pareto_front.loc[pareto_front["Sharpe Ratio"].idxmax()]
-        optimal_weights = best_portfolio["Weights"]
-        return {
-            "Return": best_portfolio["Returns"],
-            "Risk": best_portfolio["Risk"],
-            "Sharpe Ratio": best_portfolio["Sharpe Ratio"],
-            "Weights": optimal_weights,
-        }
-
     def __str__(self) -> str:
         return f"Portfolio({[asset.name for asset in self.assets]})"
 
     def __repr__(self) -> str:
         return self.__str__()
+
+    def plot_pie_chart(self) -> go.Figure:
+        symbols = [asset.symbol for asset in self.assets]
+        selected_assets = [
+            asset for asset, weight in zip(symbols, self.weights) if weight > 0.01
+        ]
+        portfolio_weights = [weight for weight in self.weights if weight > 0.01]
+
+        fig = make_subplots(rows=1, cols=1, specs=[[{"type": "domain"}]])
+
+        pie_trace = go.Pie(
+            labels=selected_assets,
+            values=portfolio_weights,
+            textinfo="label+percent",
+            hoverinfo="label+value+percent",
+            opacity=0.8,
+        )
+        fig.add_trace(pie_trace, row=1, col=1)
+
+        fig.update_layout(
+            title=f"Return of {self.portfolio_return:.2f} with a sharpe ratio of {self.sharpe_ratio:.2f} and a risk of {self.risk:.2f}",
+            height=600,
+            width=1000,
+        )
+        return fig

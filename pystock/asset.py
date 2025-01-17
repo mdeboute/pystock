@@ -1,6 +1,8 @@
-import yfinance as yf
 import numpy as np
 import pandas as pd
+import yfinance as yf
+
+import pystock.constants as cst
 
 
 class Asset:
@@ -21,17 +23,17 @@ class Asset:
 
     @property
     def name(self) -> str:
-        return self.ticker.info["shortName"] if self.listed else self.symbol  # type: ignore
+        return self.ticker.info[cst.SHORT_NAME] if self.listed else self.symbol # type: ignore
 
     def fetch_historical_data(
-        self, period: str = "5y", interval: str = "1d"
+        self, period: str = cst.DEFAULT_PERIOD, interval: str = cst.DEFAULT_INTERVAL
     ) -> pd.DataFrame | None:
         if not self.listed:
             print(f"{self.name} is not listed! You should provide the data.")
             return None
         if self._historic_data is None:
             try:
-                self._historic_data = self.ticker.history(  # type: ignore
+                self._historic_data = self.ticker.history( # type: ignore
                     period=period, interval=interval
                 )
                 self._period_in_day = self._historic_data.shape[0]
@@ -46,16 +48,16 @@ class Asset:
     @property
     def closes(self) -> pd.Series | None:
         if self._closes is None:
-            self._closes = self.historical_data["Close"]  # type: ignore
+            self._closes = self.historical_data[cst.CLOSE] # type: ignore
         return self._closes
 
     @property
     def daily_returns(self) -> np.ndarray | None:
         if self._daily_returns is None:
-            closes = self.historical_data["Close"]  # type: ignore
+            closes = self.historical_data[cst.CLOSE] # type: ignore
             daily_returns = closes.pct_change().dropna().to_numpy()
             self._daily_returns = daily_returns
-        return self._daily_returns  # type: ignore
+        return self._daily_returns # type: ignore
 
     @daily_returns.setter
     def daily_returns(self, data: list[float]):
@@ -64,10 +66,10 @@ class Asset:
     @property
     def daily_log_returns(self) -> pd.Series | None:
         if self._daily_log_returns is None:
-            closes = self.historical_data["Close"]  # type: ignore
-            daily_log_returns = np.log(closes / closes.shift(1)).dropna()  # type: ignore
+            closes = self.historical_data[cst.CLOSE] # type: ignore
+            daily_log_returns = np.log(closes / closes.shift(1)).dropna() # type: ignore
             self._daily_log_returns = daily_log_returns
-        return self._daily_log_returns  # type: ignore
+        return self._daily_log_returns # type: ignore
 
     @daily_log_returns.setter
     def daily_log_returns(self, data: list[float]):
@@ -80,7 +82,7 @@ class Asset:
                 self._expected_log_return = np.log(1 + self._expected_return)
             else:
                 self._expected_log_return = (
-                    self.daily_log_returns.mean() * self._period_in_day  # type: ignore
+                    self.daily_log_returns.mean() * self._period_in_day # type: ignore
                 )
         return self._expected_log_return
 
@@ -91,7 +93,7 @@ class Asset:
     @property
     def expected_return(self) -> float | None:
         if self._expected_return is None:
-            self._expected_return = np.exp(self.expected_log_return) - 1  # type: ignore
+            self._expected_return = np.exp(self.expected_log_return) - 1 # type: ignore
         return self._expected_return
 
     @expected_return.setter
@@ -100,7 +102,7 @@ class Asset:
 
     @property
     def volatility(self) -> float:
-        return self.daily_log_returns.std() * np.sqrt(self._period_in_day)  # type: ignore
+        return self.daily_log_returns.std() * np.sqrt(self._period_in_day) # type: ignore
 
     def __str__(self) -> str:
         return f"Asset({self.name})"
