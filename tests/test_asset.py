@@ -1,5 +1,5 @@
 import unittest
-from asset import Asset
+from pystock.asset import Asset
 
 class TestAsset(unittest.TestCase):
     def setUp(self):
