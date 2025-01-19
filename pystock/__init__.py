@@ -1,8 +1,8 @@
 __version__ = "0.1.0"
 
-import asset
-import portfolio
-import quantitative
-from asset import *
-from portfolio import *
-from quantitative import *
+import pystock.asset
+import pystock.portfolio
+import pystock.quantitative
+from pystock.asset import *
+from pystock.portfolio import *
+from pystock.quantitative import *
