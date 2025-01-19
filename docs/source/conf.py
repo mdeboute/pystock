@@ -15,7 +15,12 @@ release = pystock.__version__
 # -- General configuration ---------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#general-configuration
 
-extensions = ["sphinx.ext.autodoc", "sphinx.ext.napoleon", "autodocsumm", "sphinx.ext.coverage"]
+extensions = [
+    "sphinx.ext.autodoc",
+    "sphinx.ext.napoleon",
+    "autodocsumm",
+    "sphinx.ext.coverage",
+]
 auto_doc_default_options = {"autosummary": True}
 
 exclude_patterns = []
