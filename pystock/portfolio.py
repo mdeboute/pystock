@@ -10,11 +10,13 @@ from pystock.asset import Asset
 
 
 class Portfolio:
-    def __init__(
-        self,
-        assets: List[Asset],
-        weights: np.ndarray,
-    ):
+    def __init__(self, assets: List[Asset], weights: List[float] | np.ndarray):
+        """Portfolio object.
+
+        Args:
+            assets (List[Asset]): The list of assets composing the portfolio.
+            weights (List[float] | np.ndarray): The proportion of each asset in the portfolio.
+        """
         self.assets = assets
         self.weights = weights
         self._cov_matrix = None

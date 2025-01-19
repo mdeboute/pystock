@@ -3,15 +3,21 @@ from typing import List, Tuple
 import numpy as np
 import pandas as pd
 import plotly.express as px
+import plotly.graph_objects as go
 import pyomo.environ as pyo
 from joblib import Parallel, delayed
-import plotly.graph_objects as go
+
 import pystock.constants as cst
 from pystock.portfolio import Portfolio
 
 
 class PortfolioOptimizer:
     def __init__(self, portfolio: Portfolio):
+        """An optimizer of your Portfolio.
+
+        Args:
+            portfolio (Portfolio): The portfolio that you want to optimize.
+        """
         self.portfolio = portfolio
         self.model = self._build_core_model()
         self.solver = pyo.SolverFactory(cst.DEFAULT_SOLVER)
@@ -63,6 +69,11 @@ class PortfolioOptimizer:
 
 class MonteCarloSimulator:
     def __init__(self, portfolio: Portfolio):
+        """A Monte Carlo Simulator for your portfolio.
+
+        Args:
+            portfolio (Portfolio): The portfolio you want to work on.
+        """
         self.portfolio = portfolio
 
     def _calculate_metrics(

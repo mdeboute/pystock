@@ -7,6 +7,12 @@ import pystock.constants as cst
 
 class Asset:
     def __init__(self, symbol: str, listed: bool = True):
+        """Asset object.
+
+        Args:
+            symbol (str): Bloomberg ticker of the asset.
+            listed (bool, optional): If the asset is listed on Yahoo Finance or not. Default to True.
+        """
         self.symbol = symbol
         if listed:
             self.ticker = yf.Ticker(self.symbol)
