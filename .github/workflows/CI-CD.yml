@@ -33,6 +33,10 @@ jobs:
           pip install uv
           uv sync --extra dev
 
+      # Set PYTHONPATH
+      - name: Set PYTHONPATH
+        run: echo "PYTHONPATH=$PYTHONPATH:$(pwd)" >> $GITHUB_ENV
+
       # Run tests
       - name: Run tests with pytest
         run: |
