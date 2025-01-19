@@ -10,6 +10,5 @@ SYMBOL_COL = "Symbol"
 WEIGHT_COL = "Weight"
 
 # Others
-MONTHLY_CONTRIBUTION_INTERVAL = 21
 DEFAULT_RISK_FREE_RATE = 0.025  # eq. 1Y US/FR Treasury
 DEFAULT_SOLVER = "knitroampl"

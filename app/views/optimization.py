@@ -11,7 +11,7 @@ def show_portfolio_optimization():
         "Upload your portfolio file (.xlsx)", type=["xlsx"]
     )
     if uploaded_file:
-        portfolio = Portfolio.from_xlsx_file(uploaded_file)
+        portfolio = Portfolio.from_xlsx_file(uploaded_file)  # type: ignore
 
         desired_return = st.number_input(
             "Desired Return", min_value=0.0, value=0.1, step=0.01
@@ -20,6 +20,6 @@ def show_portfolio_optimization():
             optimizer = PortfolioOptimizer(portfolio)
             new_weights = optimizer.minimize_variance_with_return(desired_return)
             portfolio.weights = new_weights
-            st.plotly_chart(portfolio.plot_pie_chart(), use_container_width=True)
+            st.plotly_chart(portfolio.pie_chart, use_container_width=True)
     else:
         st.info("Please upload a portfolio file to begin.")

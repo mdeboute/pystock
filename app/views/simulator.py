@@ -11,7 +11,7 @@ def show_monte_carlo_simulation():
         "Upload your portfolio file (.xlsx)", type=["xlsx"]
     )
     if uploaded_file:
-        portfolio = Portfolio.from_xlsx_file(uploaded_file)
+        portfolio = Portfolio.from_xlsx_file(uploaded_file)  # type: ignore
         simulator = MonteCarloSimulator(portfolio)
 
         num_simulations = st.number_input(
@@ -21,7 +21,7 @@ def show_monte_carlo_simulation():
         if st.button("Run Simulation"):
             results = simulator.simulation(num_simulations=num_simulations)
             st.plotly_chart(
-                simulator.plot_efficient_frontier(results), use_container_width=True
+                simulator.create_efficient_frontier(results), use_container_width=True
             )
     else:
         st.info("Please upload a portfolio file to begin.")

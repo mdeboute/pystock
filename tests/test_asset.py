@@ -1,6 +1,7 @@
 import unittest
 from pystock.asset import Asset
 
+
 class TestAsset(unittest.TestCase):
     def setUp(self):
         self.asset = Asset("AAPL")

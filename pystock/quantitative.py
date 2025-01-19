@@ -5,7 +5,7 @@ import pandas as pd
 import plotly.express as px
 import pyomo.environ as pyo
 from joblib import Parallel, delayed
-
+import plotly.graph_objects as go
 import pystock.constants as cst
 from pystock.portfolio import Portfolio
 
@@ -28,14 +28,22 @@ class PortfolioOptimizer:
 
         return model
 
-    def minimize_variance_with_return(self, desired_return: float):
+    def minimize_variance_with_return(self, desired_return: float) -> np.ndarray:
+        """Minimize portfolio variance with a given return.
+
+        Args:
+            desired_return (float): Desired return.
+
+        Returns:
+            np.ndarray: Optimal portfolio weights.
+        """
         self.model.objective = pyo.Objective(
             expr=pyo.quicksum(
                 pyo.quicksum(
-                    self.portfolio.cov_matrix[i][j] * self.model.w[i] * self.model.w[j] # type: ignore
-                    for j in self.model.N # type: ignore
+                    self.portfolio.cov_matrix[i][j] * self.model.w[i] * self.model.w[j]  # type: ignore
+                    for j in self.model.N  # type: ignore
                 )
-                for i in self.model.N # type: ignore
+                for i in self.model.N  # type: ignore
             ),
             sense=pyo.minimize,
         )
@@ -50,32 +58,16 @@ class PortfolioOptimizer:
             self.model.N, rule=_link_constraint_rule
         )
         self.solver.solve(self.model)
-        return np.array([pyo.value(self.model.w[j]) for j in self.model.N]) # type: ignore
+        return np.array([pyo.value(self.model.w[j]) for j in self.model.N])  # type: ignore
 
 
 class MonteCarloSimulator:
     def __init__(self, portfolio: Portfolio):
-        """
-        Initialize the simulator with a Portfolio object.
-
-        Args:
-            portfolio (Portfolio): Portfolio object containing expected returns and covariance matrix.
-        """
         self.portfolio = portfolio
 
     def _calculate_metrics(
         self, weights: np.ndarray, risk_free_rate: float = 0.01
     ) -> Tuple[float, float, float, List[float]]:
-        """
-        Calculate portfolio return, risk, and Sharpe ratio for given weights.
-
-        Args:
-            weights (np.ndarray): Portfolio weights.
-            risk_free_rate (float): Risk-free rate.
-
-        Returns:
-            tuple: Portfolio return, risk, Sharpe ratio, and weights.
-        """
         portfolio_return = np.dot(weights, self.portfolio.expected_returns)
         portfolio_risk = np.sqrt(
             np.dot(weights, np.dot(self.portfolio.cov_matrix, weights))
@@ -116,10 +108,12 @@ class MonteCarloSimulator:
         )
 
         return pd.DataFrame(
-            results, columns=["Returns", "Risk", "Sharpe Ratio", "Weights"] # type: ignore
+            results,
+            columns=["Returns", "Risk", "Sharpe Ratio", "Weights"],  # type: ignore
         )
 
-    def get_pareto_front(self, df: pd.DataFrame) -> pd.DataFrame:
+    @staticmethod
+    def get_gareto_front(df: pd.DataFrame) -> pd.DataFrame:
         """
         Identify the Pareto front from the simulation results.
 
@@ -131,12 +125,16 @@ class MonteCarloSimulator:
         """
         return df.sort_values("Risk").drop_duplicates("Returns", keep="first")
 
-    def plot_efficient_frontier(self, df: pd.DataFrame):
+    @staticmethod
+    def create_efficient_frontier(df: pd.DataFrame) -> go.Figure:
         """
         Plot the Pareto front using Plotly.
 
         Args:
             df (pd.DataFrame): DataFrame of simulation results.
+
+        Returns:
+            px.scatter: Plotly scatter plot.
         """
         df["Weights"] = df["Weights"].apply(lambda x: str(x))
         fig = px.scatter(
