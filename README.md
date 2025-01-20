@@ -11,25 +11,16 @@ A tool that helps you better invest in the stock market.
 
 ## Installation
 
-1. Clone the repository:
-
-    ```sh
-    git clone https://github.com/yourusername/pystock.git
-    cd pystock
-    ```
-
-2. Install the dependencies:
-
-    ```sh
-    uv sync
-    ```
+ ```bash
+pip install pystock
+```
 
 ## Usage
 
 1. Run the Streamlit app:
 
-    ```sh
-    uv run streamlit run app/main.py
+    ```bash
+    streamlit run app/app.py
     ```
 
 2. Navigate through the sidebar to access different features:
@@ -46,12 +37,55 @@ A tool that helps you better invest in the stock market.
 
 ## Contributing
 
-1. Fork the repository.
-2. Create a new branch (`git checkout -b feature-branch`).
-3. Commit your changes (`git commit -am 'Add new feature'`).
-4. Push to the branch (`git push origin feature-branch`).
-5. Create a new Pull Request.
+Please follow the [CONTRIBUTING.md](./CONTRIBUTING.md) guidelines.
+
+### Packaging and tools
+
+[uv](https://docs.astral.sh/uv/) is used to manage Python version, library dependencies, packaging and publishing.
+
+To install the needed dependencies:
+
+```bash
+uv sync
+```
+
+If you add or update some dependencies, you must push the `uv.lock`.
+
+### Formatting and linting
+
+[Ruff](https://docs.astral.sh/ruff/) is used to ensure isort and flake8 standards with some linting functionnalities.
+
+You can format using:
+
+```bash
+ruff format pystock/
+```
+
+For linting, you can check for errors with (adding option ```--fix``` will update your files when ruff is able to do so):
+
+```bash
+ruff check pystock/
+```
+
+Configuration can be found in `pyproject.toml`.
+
+### Code coverage
+
+Code coverage is done with
+
+```bash
+pytest --cov=.
+```
+
+### Building documentation
+
+Documentation can be built using sphinx and by installing required dependencies.
+
+```bash
+uv sync --extra dev
+python -m sphinx docs/source docs/build/
+```
 
 ## License
 
-This project is licensed under the MIT License.
+This project is licensed under the [MIT License](./LICENSE).
