@@ -55,14 +55,9 @@ class PortfolioOptimizer:
         )
 
         def _link_constraint_rule(model, i):
-            return (
-                sum(model.w[i] * self.portfolio.expected_returns[i] for i in model.N)
-                >= desired_return
-            )
+            return sum(model.w[i] * self.portfolio.expected_returns[i] for i in model.N) >= desired_return
 
-        self.model.link_constraint = pyo.Constraint(
-            self.model.N, rule=_link_constraint_rule
-        )
+        self.model.link_constraint = pyo.Constraint(self.model.N, rule=_link_constraint_rule)
         self.solver.solve(self.model)
         return np.array([pyo.value(self.model.w[j]) for j in self.model.N])  # type: ignore
 
@@ -80,14 +75,8 @@ class MonteCarloSimulator:
         self, weights: np.ndarray, risk_free_rate: float = 0.01
     ) -> Tuple[float, float, float, List[float]]:
         portfolio_return = np.dot(weights, self.portfolio.expected_returns)
-        portfolio_risk = np.sqrt(
-            np.dot(weights, np.dot(self.portfolio.cov_matrix, weights))
-        )
-        sharpe_ratio = (
-            (portfolio_return - risk_free_rate) / portfolio_risk
-            if portfolio_risk > 0
-            else 0
-        )
+        portfolio_risk = np.sqrt(np.dot(weights, np.dot(self.portfolio.cov_matrix, weights)))
+        sharpe_ratio = (portfolio_return - risk_free_rate) / portfolio_risk if portfolio_risk > 0 else 0
         return portfolio_return, portfolio_risk, sharpe_ratio, weights.tolist()
 
     def simulation(
@@ -114,8 +103,7 @@ class MonteCarloSimulator:
         simulations = np.random.dirichlet(np.ones(n_assets), size=num_simulations)
 
         results = Parallel(n_jobs=num_jobs, backend="threading")(
-            delayed(self._calculate_metrics)(weights, risk_free_rate)
-            for weights in simulations
+            delayed(self._calculate_metrics)(weights, risk_free_rate) for weights in simulations
         )
 
         return pd.DataFrame(

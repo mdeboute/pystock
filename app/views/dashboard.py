@@ -6,9 +6,7 @@ from pystock.portfolio import Portfolio
 def show_dashboard():
     st.title("📊 Portfolio Dashboard")
 
-    uploaded_file = st.file_uploader(
-        "Upload your portfolio file (.xlsx)", type=["xlsx"]
-    )
+    uploaded_file = st.file_uploader("Upload your portfolio file (.xlsx)", type=["xlsx"])
     if uploaded_file:
         portfolio = Portfolio.from_xlsx_file(uploaded_file)  # type: ignore
         st.subheader("Portfolio Overview")

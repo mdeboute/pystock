@@ -61,9 +61,7 @@ class Asset:
                 )
                 self._period_in_day = self._historic_data.shape[0]
             except Exception as e:
-                raise Exception(
-                    f"Error while fetching data for {self.name}: {e}"
-                ) from e
+                raise Exception(f"Error while fetching data for {self.name}: {e}") from e
         return self._historic_data
 
     @property

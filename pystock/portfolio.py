@@ -1,11 +1,11 @@
 from typing import List
 
-import constants as cst
 import numpy as np
 import pandas as pd
 import plotly.graph_objects as go
 from plotly.subplots import make_subplots
 
+import pystock.constants as cst
 from pystock.asset import Asset
 
 
@@ -35,9 +35,7 @@ class Portfolio:
         """
         df = pd.read_excel(file_path)
         if cst.SYMBOL_COL not in df.columns or cst.WEIGHT_COL not in df.columns:
-            raise ValueError(
-                f"Columns {cst.SYMBOL_COL} and {cst.WEIGHT_COL} must be present in the file"
-            )
+            raise ValueError(f"Columns {cst.SYMBOL_COL} and {cst.WEIGHT_COL} must be present in the file")
         assets = []
         weights = []
         for _, row in df.iterrows():
@@ -96,9 +94,7 @@ class Portfolio:
             np.ndarray: The expected returns.
         """
         if self._expected_returns is None:
-            self._expected_returns = np.array(
-                [asset.expected_return for asset in self.assets]
-            )
+            self._expected_returns = np.array([asset.expected_return for asset in self.assets])
         return self._expected_returns
 
     @property
@@ -182,9 +178,7 @@ class Portfolio:
             go.Figure: The pie chart of the portfolio.
         """
         symbols = [asset.symbol for asset in self.assets]
-        selected_assets = [
-            asset for asset, weight in zip(symbols, self.weights) if weight > 0.01
-        ]
+        selected_assets = [asset for asset, weight in zip(symbols, self.weights) if weight > 0.01]
         portfolio_weights = [weight for weight in self.weights if weight > 0.01]
 
         fig = make_subplots(rows=1, cols=1, specs=[[{"type": "domain"}]])

@@ -11,6 +11,4 @@ class TestPortfolio(unittest.TestCase):
 
     def test_bad_weighted_portfolio(self):
         with self.assertRaises(ValueError):
-            Portfolio(
-                [self.appl_stock, self.tsla_stock, self.msft_stock], [0.3, 0.3, 0.3]
-            )
+            Portfolio([self.appl_stock, self.tsla_stock, self.msft_stock], [0.3, 0.3, 0.3])

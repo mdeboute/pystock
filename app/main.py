@@ -7,9 +7,7 @@ from app.views.simulator import show_monte_carlo_simulation
 
 def main():
     st.sidebar.title("Navigation")
-    view = st.sidebar.radio(
-        "Go to", ["Dashboard", "Monte Carlo Simulation", "Portfolio Optimization"]
-    )
+    view = st.sidebar.radio("Go to", ["Dashboard", "Monte Carlo Simulation", "Portfolio Optimization"])
 
     if view == "Dashboard":
         show_dashboard()
