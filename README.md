@@ -1,5 +1,8 @@
 # pystock
 
+[![License](https://img.shields.io/github/license/mdeboute/pystock)](./LICENSE)
+[![CI-CD](https://github.com/mdeboute/pystock/actions/workflows/CI-CD.yml/badge.svg)](https://github.com/mdeboute/pystock/actions/workflows/CI-CD.yml)
+
 A tool that helps you better invest in the stock market.
 
 ## Features
@@ -11,8 +14,19 @@ A tool that helps you better invest in the stock market.
 
 ## Installation
 
- ```bash
-pip install pystock
+The package is not yet available on PyPI. To install the package, clone the repository and generate a wheel file:
+
+```bash
+git clone https://github.com/mdeboute/pystock.git
+cd pystock
+uv sync
+uv build
+```
+
+Then, install the wheel file:
+
+```bash
+pip install dist/pystock-0.1.0-py3-none-any.whl
 ```
 
 ## Usage
