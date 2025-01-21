@@ -21,6 +21,7 @@ class Portfolio:
         self.weights = weights
         self._cov_matrix = None
         self._expected_returns = None
+        self.period_in_days = min([len(asset.daily_returns) for asset in self.assets])
         self._check_consistency()
 
     @classmethod
@@ -75,15 +76,11 @@ class Portfolio:
             np.ndarray: The covariance matrix.
         """
         if self._cov_matrix is None:
-            period_in_days = len(self.assets[0].daily_returns)  # type: ignore
-            for asset in self.assets:
-                if len(asset.daily_returns) < period_in_days:  # type: ignore
-                    period_in_days = len(asset.daily_returns)  # type: ignore
             daily_returns = [
-                asset.daily_returns[:period_in_days]
+                asset.daily_returns[: self.period_in_days]
                 for asset in self.assets  # type: ignore
             ]
-            self._cov_matrix = np.cov(np.array(daily_returns)) * period_in_days
+            self._cov_matrix = np.cov(np.array(daily_returns)) * self.period_in_days
         return self._cov_matrix
 
     @property
@@ -193,7 +190,7 @@ class Portfolio:
         fig.add_trace(pie_trace, row=1, col=1)
 
         fig.update_layout(
-            title=f"Return of {self.portfolio_return:.2f} with a sharpe ratio of {self.sharpe_ratio:.2f} and a risk of {self.risk:.2f}",
+            title=f"Return of {self.portfolio_return:.2f} with a sharpe ratio of {self.sharpe_ratio:.2f} and a risk of {self.risk:.2f} over {self.period_in_days} days",
             height=600,
             width=1000,
         )
