@@ -6,12 +6,15 @@ import pystock.constants as cst
 
 
 class Asset:
-    def __init__(self, symbol: str, listed: bool = True):
+    """Asset object."""
+
+    def __init__(self, symbol: str, listed: bool = True) -> None:
         """Asset object.
 
         Args:
             symbol (str): Bloomberg ticker of the asset.
             listed (bool, optional): If the asset is listed on Yahoo Finance or not. Default to True.
+
         """
         self.symbol = symbol
         if listed:
@@ -33,11 +36,14 @@ class Asset:
 
         Returns:
             str: The name of the asset.
+
         """
         return self.ticker.info[cst.SHORT_NAME] if self.listed else self.symbol  # type: ignore
 
     def fetch_historical_data(
-        self, period: str = cst.DEFAULT_PERIOD, interval: str = cst.DEFAULT_INTERVAL
+        self,
+        period: str = cst.DEFAULT_PERIOD,
+        interval: str = cst.DEFAULT_INTERVAL,
     ) -> pd.DataFrame | None:
         """Fetch historical data for the asset.
 
@@ -50,6 +56,7 @@ class Asset:
 
         Returns:
             pd.DataFrame | None: The historical data of the asset.
+
         """
         if not self.listed:
             print(f"{self.name} is not listed! You should provide the data.")
@@ -57,7 +64,8 @@ class Asset:
         if self._historic_data is None:
             try:
                 self._historic_data = self.ticker.history(  # type: ignore
-                    period=period, interval=interval
+                    period=period,
+                    interval=interval,
                 )
                 self._period_in_day = self._historic_data.shape[0]
             except Exception as e:
@@ -70,6 +78,7 @@ class Asset:
 
         Returns:
             pd.DataFrame | None: The historical data of the asset.
+
         """
         return self.fetch_historical_data()
 
@@ -79,6 +88,7 @@ class Asset:
 
         Returns:
             pd.Series | None: The closing prices of the asset.
+
         """
         if self._closes is None:
             self._closes = self.historical_data[cst.CLOSE]  # type: ignore
@@ -90,6 +100,7 @@ class Asset:
 
         Returns:
             np.ndarray | None: The daily returns of the asset.
+
         """
         if self._daily_returns is None:
             closes = self.historical_data[cst.CLOSE]  # type: ignore
@@ -98,11 +109,12 @@ class Asset:
         return self._daily_returns  # type: ignore
 
     @daily_returns.setter
-    def daily_returns(self, data: list[float]):
+    def daily_returns(self, data: list[float]) -> None:
         """Set the daily returns of the asset.
 
         Args:
             data (list[float]): The daily returns of the asset.
+
         """
         self._daily_returns = data
 
@@ -112,6 +124,7 @@ class Asset:
 
         Returns:
             pd.Series | None: The daily log returns of the asset.
+
         """
         if self._daily_log_returns is None:
             closes = self.historical_data[cst.CLOSE]  # type: ignore
@@ -120,11 +133,12 @@ class Asset:
         return self._daily_log_returns  # type: ignore
 
     @daily_log_returns.setter
-    def daily_log_returns(self, data: list[float]):
+    def daily_log_returns(self, data: list[float]) -> None:
         """Set the daily log returns of the asset.
 
         Args:
             data (list[float]): The daily log returns of the asset.
+
         """
         self._daily_log_returns = data
 
@@ -134,6 +148,7 @@ class Asset:
 
         Returns:
             float | None: The expected log return of the asset.
+
         """
         if self._expected_log_return is None:
             if self._expected_return is not None:
@@ -145,11 +160,12 @@ class Asset:
         return self._expected_log_return
 
     @expected_log_return.setter
-    def expected_log_return(self, value: float):
+    def expected_log_return(self, value: float) -> None:
         """Set the expected log return of the asset.
 
         Args:
             value (float): The expected log return of the asset.
+
         """
         self._expected_log_return = value
 
@@ -159,26 +175,29 @@ class Asset:
 
         Returns:
             float | None: The expected return of the asset.
+
         """
         if self._expected_return is None:
             self._expected_return = np.exp(self.expected_log_return) - 1  # type: ignore
         return self._expected_return
 
     @expected_return.setter
-    def expected_return(self, value: float):
+    def expected_return(self, value: float) -> None:
         """Set the expected return of the asset.
 
         Args:
             value (float): The expected return of the asset.
+
         """
         self._expected_return = value
 
     @property
     def volatility(self) -> float:
-        """Return the volatility of the asset.
+        """Return the volatility of the asset as the standard deviation of the daily log returns.
 
         Returns:
             float: The volatility of the asset.
+
         """
         return self.daily_log_returns.std() * np.sqrt(self._period_in_day)  # type: ignore
 

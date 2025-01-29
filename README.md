@@ -96,7 +96,6 @@ pytest --cov=.
 Documentation can be built using sphinx and by installing required dependencies.
 
 ```bash
-uv sync --extra dev
 python -m sphinx docs/source docs/build/
 ```
 

@@ -1,20 +1,30 @@
-[project]
-name = "pystock"
-version = "0.1.0"
-description = "A Python package which helps me to better invest in the stock market."
-readme = "README.md"
-requires-python = ">=3.13"
-license = { text = "MIT" }
-authors = [
-    { name = "Martin Debouté", email = "martin.deboute@gmail.com" }
+[dependency-groups]
+dev = [
+    "autodocsumm>=0.2.14",
+    "packaging>=24.2",
+    "pre-commit>=4.0.1",
+    "pyprojectsort>=0.4.0",
+    "pytest>=8.3.3",
+    "ruff>=0.7.2",
+    "sphinx-autodoc-typehints>=3.0.1",
+    "sphinx-copybutton>=0.5.2",
+    "sphinx-design>=0.6.1",
+    "sphinx>=8.1.3",
+    "sphinxcontrib-programoutput>=0.18",
+    "validate-pyproject>=0.23",
+    "watchdog>=5.0.3",
 ]
-keywords = ["stock market", "investment", "finance", "python"]
+
+[project]
+authors = [
+    { email = "martin.deboute@gmail.com", name = "Martin DeboutÃ©" },
+]
 classifiers = [
     "Development Status :: 3 - Alpha",
     "Intended Audience :: Developers",
     "License :: OSI Approved :: MIT License",
     "Programming Language :: Python :: 3.13",
-    "Topic :: Software Development :: Libraries :: Python Modules"
+    "Topic :: Software Development :: Libraries :: Python Modules",
 ]
 dependencies = [
     "ipykernel>=6.29.5",
@@ -27,34 +37,60 @@ dependencies = [
     "plotly>=5.24.1",
     "pydata-sphinx-theme>=0.16.1",
     "pyomo>=6.8.0",
+    "scikit-learn>=1.6.1",
     "streamlit>=1.40.0",
     "yfinance>=0.2.48",
 ]
+description = "A Python package which helps me to better invest in the stock market."
+keywords = [
+    "finance",
+    "investment",
+    "python",
+    "stock market",
+]
+name = "pystock"
+readme = "README.md"
+requires-python = ">=3.13"
+version = "0.1.0"
+
+[project.license]
+text = "MIT"
 
 [project.urls]
-"Homepage" = "https://github.com/mdeboute/pystock"
-"Documentation" = "https://github.com/mdeboute/pystock/wiki"
-"Source" = "https://github.com/mdeboute/pystock"
-"Tracker" = "https://github.com/mdeboute/pystock/issues"
-
-[project.optional-dependencies]
-dev = [
-    "pre-commit>=4.0.1",
-    "pytest>=8.3.3",
-    "ruff>=0.7.2",
-    "sphinx>=8.1.3",
-    "validate-pyproject>=0.23",
-    "watchdog>=5.0.3",
-    "packaging>=24.2",
-    "autodocsumm>=0.2.14",
-    "sphinx-autodoc-typehints>=3.0.1",
-    "sphinx-copybutton>=0.5.2",
-    "sphinx-design>=0.6.1",
-    "sphinxcontrib-programoutput>=0.18",
-]
-
-[tool.setuptools.packages.find]
-include = ["pystock"]
+Documentation = "https://github.com/mdeboute/pystock/wiki"
+Homepage = "https://github.com/mdeboute/pystock"
+Source = "https://github.com/mdeboute/pystock"
+Tracker = "https://github.com/mdeboute/pystock/issues"
 
 [tool.ruff]
 line-length = 120
+
+[tool.ruff.lint]
+ignore = [
+    "B905",
+    "COM812",
+    "D100",
+    "D104",
+    "D105",
+    "D203",
+    "D213",
+    "EM101",
+    "EM102",
+    "F401",
+    "F403",
+    "FBT001",
+    "FBT002",
+    "PD901",
+    "PGH003",
+    "T201",
+    "TRY002",
+    "TRY003",
+]
+select = [
+    "ALL",
+]
+
+[tool.setuptools.packages.find]
+include = [
+    "pystock",
+]
