@@ -14,7 +14,6 @@ class Asset:
         Args:
             symbol (str): Bloomberg ticker of the asset.
             listed (bool, optional): If the asset is listed on Yahoo Finance or not. Default to True.
-
         """
         self.symbol = symbol
         if listed:
@@ -36,7 +35,6 @@ class Asset:
 
         Returns:
             str: The name of the asset.
-
         """
         return self.ticker.info[cst.SHORT_NAME] if self.listed else self.symbol  # type: ignore
 
@@ -56,7 +54,6 @@ class Asset:
 
         Returns:
             pd.DataFrame | None: The historical data of the asset.
-
         """
         if not self.listed:
             print(f"{self.name} is not listed! You should provide the data.")
@@ -78,7 +75,6 @@ class Asset:
 
         Returns:
             pd.DataFrame | None: The historical data of the asset.
-
         """
         return self.fetch_historical_data()
 
@@ -88,7 +84,6 @@ class Asset:
 
         Returns:
             pd.Series | None: The closing prices of the asset.
-
         """
         if self._closes is None:
             self._closes = self.historical_data[cst.CLOSE]  # type: ignore
@@ -100,7 +95,6 @@ class Asset:
 
         Returns:
             np.ndarray | None: The daily returns of the asset.
-
         """
         if self._daily_returns is None:
             closes = self.historical_data[cst.CLOSE]  # type: ignore
@@ -114,7 +108,6 @@ class Asset:
 
         Args:
             data (list[float]): The daily returns of the asset.
-
         """
         self._daily_returns = data
 
@@ -124,7 +117,6 @@ class Asset:
 
         Returns:
             pd.Series | None: The daily log returns of the asset.
-
         """
         if self._daily_log_returns is None:
             closes = self.historical_data[cst.CLOSE]  # type: ignore
@@ -138,7 +130,6 @@ class Asset:
 
         Args:
             data (list[float]): The daily log returns of the asset.
-
         """
         self._daily_log_returns = data
 
@@ -148,7 +139,6 @@ class Asset:
 
         Returns:
             float | None: The expected log return of the asset.
-
         """
         if self._expected_log_return is None:
             if self._expected_return is not None:
@@ -165,7 +155,6 @@ class Asset:
 
         Args:
             value (float): The expected log return of the asset.
-
         """
         self._expected_log_return = value
 
@@ -175,7 +164,6 @@ class Asset:
 
         Returns:
             float | None: The expected return of the asset.
-
         """
         if self._expected_return is None:
             self._expected_return = np.exp(self.expected_log_return) - 1  # type: ignore
@@ -187,7 +175,6 @@ class Asset:
 
         Args:
             value (float): The expected return of the asset.
-
         """
         self._expected_return = value
 

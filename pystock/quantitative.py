@@ -43,7 +43,6 @@ class PortfolioOptimizer:
 
         Returns:
             np.ndarray: Optimal portfolio weights.
-
         """
         self.model.objective = pyo.Objective(
             expr=pyo.quicksum(
@@ -101,7 +100,6 @@ class MonteCarloSimulator:
 
         Returns:
             pd.DataFrame: Results of the simulation (returns, risk, Sharpe ratio, weights).
-
         """
         if num_simulations <= 0:
             raise ValueError("Number of simulations must be a positive integer.")
@@ -127,7 +125,6 @@ class MonteCarloSimulator:
 
         Returns:
             pd.DataFrame: DataFrame containing Pareto-optimal portfolios.
-
         """
         return df.sort_values("Risk").drop_duplicates("Returns", keep="first")
 
@@ -140,7 +137,6 @@ class MonteCarloSimulator:
 
         Returns:
             px.scatter: Plotly scatter plot.
-
         """
         df["Weights"] = df["Weights"].apply(lambda x: str(x))
         fig = px.scatter(
