@@ -38,6 +38,7 @@ dependencies = [
     "pydata-sphinx-theme>=0.16.1",
     "pyomo>=6.8.0",
     "scikit-learn>=1.6.1",
+    "scipy>=1.15.1",
     "streamlit>=1.40.0",
     "yfinance>=0.2.48",
 ]
@@ -80,6 +81,9 @@ ignore = [
     "F403",
     "FBT001",
     "FBT002",
+    "ISC001",
+    "N803",
+    "N806",
     "PD901",
     "PGH003",
     "T201",

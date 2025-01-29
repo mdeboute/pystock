@@ -22,7 +22,6 @@ class Portfolio:
         self.assets = assets
         self.weights = weights
         self._cov_matrix = None
-        self._expected_returns = None
         self.period_in_days = min([len(asset.daily_returns) for asset in self.assets])
         self._check_consistency()
 
@@ -70,7 +69,6 @@ class Portfolio:
 
     def _reset_cache(self) -> None:
         self._cov_matrix = None
-        self._expected_returns = None
 
     @property
     def cov_matrix(self) -> np.ndarray:
@@ -96,9 +94,7 @@ class Portfolio:
             np.ndarray: The expected returns.
 
         """
-        if self._expected_returns is None:
-            self._expected_returns = np.array([asset.expected_return for asset in self.assets])
-        return self._expected_returns
+        return np.array([asset.expected_return for asset in self.assets])
 
     @property
     def historical_returns(self) -> np.ndarray:
@@ -148,7 +144,7 @@ class Portfolio:
             float: The Sharpe ratio of the portfolio.
 
         """
-        return (self.historical_expected_return - cst.DEFAULT_RISK_FREE_RATE) / self.risk
+        return (self.historical_expected_return - cst.DEFAULT_RISK_FREE_RATE) / self.risk if self.risk > 0 else 0
 
     def add_asset(self, asset: Asset, weight: float) -> None:
         """Add an asset to the portfolio.
