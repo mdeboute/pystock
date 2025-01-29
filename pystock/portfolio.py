@@ -35,6 +35,7 @@ class Portfolio:
 
         Raises:
             ValueError: If the columns `SYMBOL_COL` and `WEIGHT_COL` are not present in the file.
+
         """
         df = pd.read_excel(file_path)
         if cst.SYMBOL_COL not in df.columns or cst.WEIGHT_COL not in df.columns:
@@ -52,6 +53,7 @@ class Portfolio:
 
         Args:
             file_path (str): Path to the XLSX file.
+
         """
         data = {
             cst.SYMBOL_COL: [asset.symbol for asset in self.assets],
@@ -76,6 +78,7 @@ class Portfolio:
 
         Returns:
             np.ndarray: The covariance matrix.
+
         """
         if self._cov_matrix is None:
             daily_returns = [
@@ -113,6 +116,7 @@ class Portfolio:
 
         Returns:
             float: The variance of the portfolio.
+
         """
         return np.dot(self.weights, np.dot(self.cov_matrix, self.weights))
 
@@ -152,6 +156,7 @@ class Portfolio:
         Args:
             asset (Asset): The asset to add.
             weight (float): The weight of the asset in the portfolio.
+
         """
         self.assets.append(asset)
         self.weights = np.append(self.weights, weight)
@@ -167,6 +172,7 @@ class Portfolio:
 
         Raises:
             ValueError: If the asset is not in the portfolio.
+
         """
         if asset not in self.assets:
             raise ValueError("The asset is not in the portfolio.")
